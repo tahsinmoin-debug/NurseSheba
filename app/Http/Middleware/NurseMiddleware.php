@@ -10,8 +10,11 @@ class NurseMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || auth()->user()->role !== 'nurse') {
-            return redirect('/dashboard')->with('error', 'Access denied. Nurses only.');
+        if (!auth()->check()) {
+            return redirect('/login');
+        }
+        if (auth()->user()->role !== 'nurse') {
+            return redirect('/')->with('error', 'Access denied. Nurses only.');
         }
         return $next($request);
     }

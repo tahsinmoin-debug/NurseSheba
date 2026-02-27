@@ -40,7 +40,7 @@
             </div>
             <div class="mb-4">
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="availability" id="availability" {{ old('availability') !== null ? (old('availability') ? 'checked' : '') : (isset($profile) && $profile && !$profile->availability ? '' : 'checked') }}>
+                <input class="form-check-input" type="checkbox" name="availability" id="availability" {{ ($profile && !$profile->availability) ? '' : 'checked' }}>
                 <label class="form-check-label fw-semibold" for="availability">Available for Bookings</label>
               </div>
             </div>

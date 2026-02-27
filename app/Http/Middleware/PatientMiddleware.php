@@ -10,8 +10,11 @@ class PatientMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || auth()->user()->role !== 'patient') {
-            return redirect('/dashboard')->with('error', 'Access denied. Patients only.');
+        if (!auth()->check()) {
+            return redirect('/login');
+        }
+        if (auth()->user()->role !== 'patient') {
+            return redirect('/')->with('error', 'Access denied. Patients only.');
         }
         return $next($request);
     }
