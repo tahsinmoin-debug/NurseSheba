@@ -31,7 +31,7 @@
 
           <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" novalidate>
             @csrf
-            <input type="hidden" name="role" id="roleInput" value="{{ old('role', 'patient') }}">
+            <input type="hidden" name="role" id="roleInput" value="{{ old('role', $preferredRole ?? 'patient') }}">
             @if($errors->any())
               <div class="alert alert-danger">
                 <ul class="mb-0 ps-3">
@@ -131,7 +131,7 @@
 @section('scripts')
 <script>
 $(document).ready(function() {
-  var role = '{{ old("role", "patient") }}';
+  var role = '{{ old("role", $preferredRole ?? "patient") }}';
   setActiveRole(role);
 
   $('.role-card').click(function() {

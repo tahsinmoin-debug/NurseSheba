@@ -9,6 +9,7 @@
     <div class="d-flex gap-3 justify-content-center flex-wrap">
       <a href="{{ route('nurses.index') }}" class="btn btn-primary btn-lg"><i class="fas fa-search me-2"></i>Find Nurses</a>
       <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg"><i class="fas fa-user-plus me-2"></i>Register as Patient</a>
+      <a href="{{ route('home.nurse') }}" class="btn btn-outline-primary btn-lg"><i class="fas fa-user-nurse me-2"></i>For Nurses</a>
     </div>
   </div>
 </div>

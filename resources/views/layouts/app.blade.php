@@ -27,6 +27,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('home.nurse') }}">For Nurses</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ route('nurses.index') }}">Find Nurses</a></li>
       </ul>
       <ul class="navbar-nav">

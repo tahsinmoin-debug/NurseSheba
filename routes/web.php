@@ -12,6 +12,7 @@ use App\Http\Controllers\ReviewController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/for-nurses', [HomeController::class, 'nurseHome'])->name('home.nurse');
 Route::get('/nurses', [HomeController::class, 'nurses'])->name('nurses.index');
 Route::get('/nurses/{id}', [HomeController::class, 'nurseProfile'])->name('nurses.show');
 

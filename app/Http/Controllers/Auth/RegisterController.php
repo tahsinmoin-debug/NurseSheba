@@ -17,10 +17,15 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    public function showRegistrationForm()
+    public function showRegistrationForm(Request $request)
     {
+        $preferredRole = in_array($request->query('role'), ['nurse', 'patient'], true)
+            ? $request->query('role')
+            : 'patient';
+
         return view('auth.register', [
             'locations' => config('dhaka_areas', []),
+            'preferredRole' => $preferredRole,
         ]);
     }
 
