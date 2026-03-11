@@ -9,10 +9,10 @@
     <div class="card-body">
       <form action="{{ route('nurses.index') }}" method="GET" class="row g-3">
         <div class="col-md-5">
-          <select name="district" class="form-select">
-            <option value="">All Districts</option>
-            @foreach($districts as $district)
-              <option value="{{ $district }}" {{ request('district') == $district ? 'selected' : '' }}>{{ $district }}</option>
+          <select name="location" class="form-select">
+            <option value="">All Dhaka Areas</option>
+            @foreach($locations as $location)
+              <option value="{{ $location }}" {{ request('location') == $location ? 'selected' : '' }}>{{ $location }}</option>
             @endforeach
           </select>
         </div>
@@ -38,7 +38,7 @@
           </div>
           <h6 class="fw-bold mb-1">{{ $nurse->name }}</h6>
           <p class="small text-muted mb-1">{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
-          <p class="small text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->nurseProfile->district ?? 'N/A' }}</p>
+          <p class="small text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</p>
           <p class="small text-muted mb-2"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} yrs</p>
           @if($nurse->nurseProfile && $nurse->nurseProfile->is_approved)
             <span class="badge bg-success mb-2">Approved</span>

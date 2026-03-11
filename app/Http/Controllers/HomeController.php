@@ -7,19 +7,6 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    private $districts = [
-        'Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barishal',
-        'Mymensingh', 'Rangpur', 'Comilla', 'Gazipur', 'Narayanganj', 'Narsingdi',
-        'Tangail', 'Jamalpur', 'Sherpur', 'Netrokona', 'Kishoreganj', 'Manikganj',
-        'Munshiganj', 'Faridpur', 'Gopalganj', 'Madaripur', 'Rajbari', 'Shariatpur',
-        'Sunamganj', 'Habiganj', 'Moulvibazar', 'Bogura', 'Joypurhat', 'Naogaon',
-        'Natore', 'Chapainawabganj', 'Pabna', 'Sirajganj', 'Jessore', 'Satkhira',
-        'Magura', 'Jhenaidah', 'Narail', 'Chuadanga', 'Kushtia', 'Meherpur',
-        'Bagerhat', 'Patuakhali', 'Bhola', 'Jhalokati', 'Barguna', 'Pirojpur',
-        'Barisal', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Feni',
-        'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati',
-    ];
-
     public function index()
     {
         $featuredNurses = User::where('role', 'nurse')
@@ -33,7 +20,7 @@ class HomeController extends Controller
 
         return view('home.index', [
             'featuredNurses' => $featuredNurses,
-            'districts' => $this->districts,
+            'locations' => config('dhaka_areas', []),
         ]);
     }
 
@@ -45,10 +32,8 @@ class HomeController extends Controller
             })
             ->with('nurseProfile');
 
-        if ($request->district) {
-            $query->whereHas('nurseProfile', function ($q) use ($request) {
-                $q->where('district', $request->district);
-            });
+        if ($request->location) {
+            $query->where('location', $request->location);
         }
 
         if ($request->specialization) {
@@ -61,7 +46,7 @@ class HomeController extends Controller
 
         return view('nurses.index', [
             'nurses' => $nurses,
-            'districts' => $this->districts,
+            'locations' => config('dhaka_areas', []),
         ]);
     }
 

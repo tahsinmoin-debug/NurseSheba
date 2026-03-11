@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetOtpController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\NurseController;
@@ -17,9 +18,17 @@ Route::get('/nurses/{id}', [HomeController::class, 'nurseProfile'])->name('nurse
 // Auth routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::get('/admin/login', [LoginController::class, 'showAdminLoginForm'])->name('admin.login');
+Route::post('/admin/login', [LoginController::class, 'adminLogin'])->name('admin.login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
+Route::get('/forgot-password', [PasswordResetOtpController::class, 'showRequestForm'])->name('password.otp.request.form');
+Route::post('/forgot-password', [PasswordResetOtpController::class, 'sendOtp'])->name('password.otp.send');
+Route::get('/forgot-password/verify', [PasswordResetOtpController::class, 'showVerifyForm'])->name('password.otp.verify.form');
+Route::post('/forgot-password/verify', [PasswordResetOtpController::class, 'verifyOtp'])->name('password.otp.verify');
+Route::get('/forgot-password/reset/{token}', [PasswordResetOtpController::class, 'showResetForm'])->name('password.otp.reset.form');
+Route::post('/forgot-password/reset', [PasswordResetOtpController::class, 'resetPassword'])->name('password.otp.reset');
 
 // Redirect /dashboard based on role
 Route::middleware('auth')->get('/dashboard', function() {

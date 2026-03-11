@@ -29,9 +29,21 @@
             </div>
           </div>
 
-          <form method="POST" action="{{ route('register') }}">
+          <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" novalidate>
             @csrf
             <input type="hidden" name="role" id="roleInput" value="{{ old('role', 'patient') }}">
+            @if($errors->any())
+              <div class="alert alert-danger">
+                <ul class="mb-0 ps-3">
+                  @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            @endif
+            @if($errors->has('register'))
+              <div class="alert alert-danger">{{ $errors->first('register') }}</div>
+            @endif
             <div class="mb-3">
               <label class="form-label fw-semibold">Full Name</label>
               <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
@@ -48,13 +60,56 @@
               @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3">
+              <label class="form-label fw-semibold">Location (Dhaka Area)</label>
+              <select name="location" class="form-select @error('location') is-invalid @enderror" required>
+                <option value="">Select your area</option>
+                @foreach($locations as $location)
+                  <option value="{{ $location }}" {{ old('location') === $location ? 'selected' : '' }}>{{ $location }}</option>
+                @endforeach
+              </select>
+              @error('location')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="mb-3">
               <label class="form-label fw-semibold">Address</label>
               <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address') }}" required>
               @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
+            <div id="nurseFields" style="display:none;">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Qualification</label>
+              <input type="text" name="qualification" id="qualification" class="form-control @error('qualification') is-invalid @enderror" value="{{ old('qualification') }}" placeholder="e.g. BSc in Nursing">
+                @error('qualification')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Gender</label>
+                <select name="gender" id="gender" class="form-select @error('gender') is-invalid @enderror">
+                  <option value="">Select gender</option>
+                  <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                  <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                </select>
+                @error('gender')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Years of Experience</label>
+                <input type="number" name="experience_years" id="experience_years" class="form-control @error('experience_years') is-invalid @enderror" value="{{ old('experience_years') }}" min="0" placeholder="e.g. 3">
+                @error('experience_years')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Specialization</label>
+                <input type="text" name="specialization" id="specialization" class="form-control @error('specialization') is-invalid @enderror" value="{{ old('specialization') }}" placeholder="e.g. ICU, Elderly Care">
+                @error('specialization')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">License/Certificate Upload</label>
+                <input type="file" name="license_document" id="license_document" class="form-control @error('license_document') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                <small class="text-muted">Allowed: PDF, JPG, JPEG, PNG (max 5MB)</small>
+                @error('license_document')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+            </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Password</label>
               <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+              <small class="text-muted">Minimum 8 characters.</small>
               @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="mb-4">
@@ -88,6 +143,10 @@ $(document).ready(function() {
   function setActiveRole(role) {
     $('.role-card').removeClass('border-primary').css('border-color', '');
     $('#' + role + 'Card').addClass('border-primary');
+    var isNurse = role === 'nurse';
+    $('#nurseFields').toggle(isNurse);
+    $('#qualification, #gender, #experience_years, #specialization, #license_document').prop('disabled', !isNurse);
+    $('#qualification, #gender, #experience_years, #specialization, #license_document').prop('required', isNurse);
   }
 });
 </script>

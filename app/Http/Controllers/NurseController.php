@@ -2,23 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NurseProfile;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NurseController extends Controller
 {
-    private $districts = [
-        'Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barishal',
-        'Mymensingh', 'Rangpur', 'Comilla', 'Gazipur', 'Narayanganj', 'Narsingdi',
-        'Tangail', 'Jamalpur', 'Sherpur', 'Netrokona', 'Kishoreganj', 'Manikganj',
-        'Munshiganj', 'Faridpur', 'Gopalganj', 'Madaripur', 'Rajbari', 'Shariatpur',
-        'Sunamganj', 'Habiganj', 'Moulvibazar', 'Bogura', 'Joypurhat', 'Naogaon',
-        'Natore', 'Chapainawabganj', 'Pabna', 'Sirajganj', 'Jessore', 'Satkhira',
-        'Magura', 'Jhenaidah', 'Narail', 'Chuadanga', 'Kushtia', 'Meherpur',
-        'Bagerhat', 'Patuakhali', 'Bhola', 'Jhalokati', 'Barguna', 'Pirojpur',
-        'Barisal', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Feni',
-        'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati',
-    ];
-
     public function dashboard()
     {
         $bookings = auth()->user()->bookingsAsNurse()
@@ -32,34 +21,51 @@ class NurseController extends Controller
     public function profile()
     {
         $profile = auth()->user()->nurseProfile;
-        return view('nurse.profile', ['profile' => $profile, 'districts' => $this->districts]);
+        return view('nurse.profile', [
+            'profile' => $profile,
+            'locations' => config('dhaka_areas', []),
+        ]);
     }
 
     public function updateProfile(Request $request)
     {
         $request->validate([
+            'qualification' => 'required|string|max:255',
+            'gender' => 'required|in:male,female',
             'specialization' => 'required|string|max:255',
             'experience_years' => 'required|integer|min:0',
-            'district' => 'required|string',
-            'thana' => 'required|string|max:255',
+            'location' => ['required', 'string', Rule::in(config('dhaka_areas', []))],
             'bio' => 'nullable|string',
             'availability' => 'nullable|boolean',
+            'license_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         $profile = auth()->user()->nurseProfile;
         if (!$profile) {
-            $profile = new \App\Models\NurseProfile(['user_id' => auth()->id()]);
+            $profile = new NurseProfile(['user_id' => auth()->id()]);
+        }
+
+        if ($request->hasFile('license_document')) {
+            $licenseDocumentPath = $request->file('license_document')->store('license_documents', 'public');
+            $profile->license_document = $licenseDocumentPath;
+            $profile->documents = $licenseDocumentPath;
         }
 
         $profile->fill([
+            'qualification' => $request->qualification,
+            'gender' => $request->gender,
             'specialization' => $request->specialization,
             'experience_years' => $request->experience_years,
-            'district' => $request->district,
-            'thana' => $request->thana,
+            'district' => 'Dhaka',
+            'thana' => $request->location,
             'bio' => $request->bio,
             'availability' => $request->has('availability'),
         ]);
         $profile->save();
+
+        $user = auth()->user();
+        $user->location = $request->location;
+        $user->save();
 
         return redirect()->route('nurse.profile')->with('success', 'Profile updated successfully!');
     }

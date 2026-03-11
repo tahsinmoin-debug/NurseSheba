@@ -4,7 +4,7 @@
 <!-- Hero Section -->
 <div style="background: linear-gradient(135deg, #ffffff 0%, #e0f4ff 100%); padding: 80px 0;">
   <div class="container text-center">
-    <h1 class="display-4 fw-bold mb-3" style="color: #0288d1;">Quality Home Nursing Services<br>in Bangladesh</h1>
+    <h1 class="display-4 fw-bold mb-3" style="color: #0288d1;">Quality Home Nursing Services<br>Across Dhaka</h1>
     <p class="lead mb-4 text-muted">Professional nurses available at your doorstep. Safe, reliable, and affordable healthcare at home.</p>
     <div class="d-flex gap-3 justify-content-center flex-wrap">
       <a href="{{ route('nurses.index') }}" class="btn btn-primary btn-lg"><i class="fas fa-search me-2"></i>Find Nurses</a>
@@ -20,10 +20,10 @@
       <h4 class="mb-3 text-center" style="color: #0288d1;"><i class="fas fa-search me-2"></i>Find a Nurse Near You</h4>
       <form action="{{ route('nurses.index') }}" method="GET" class="row g-3">
         <div class="col-md-5">
-          <select name="district" class="form-select form-select-lg">
-            <option value="">Select District</option>
-            @foreach($districts as $district)
-              <option value="{{ $district }}">{{ $district }}</option>
+          <select name="location" class="form-select form-select-lg">
+            <option value="">Select Dhaka Area</option>
+            @foreach($locations as $location)
+              <option value="{{ $location }}">{{ $location }}</option>
             @endforeach
           </select>
         </div>
@@ -54,7 +54,7 @@
           </div>
           <h5 class="fw-bold">{{ $nurse->name }}</h5>
           <p class="text-muted mb-1"><i class="fas fa-stethoscope me-1"></i>{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
-          <p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->nurseProfile->district ?? 'N/A' }}</p>
+          <p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</p>
           <p class="text-muted mb-3"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} years exp.</p>
           <a href="{{ route('nurses.show', $nurse->id) }}" class="btn btn-primary btn-sm">View Profile</a>
           @auth
@@ -86,7 +86,7 @@
             <i class="fas fa-search fa-2x" style="color:#0288d1;"></i>
           </div>
           <h4 class="fw-bold">1. Search</h4>
-          <p class="text-muted">Find qualified nurses by district or specialization</p>
+          <p class="text-muted">Find qualified nurses by Dhaka area or specialization</p>
         </div>
       </div>
       <div class="col-md-4">
@@ -124,8 +124,8 @@
         <p>Happy Patients</p>
       </div>
       <div class="col-6 col-md-3">
-        <h2 class="fw-bold display-5">64</h2>
-        <p>Districts Covered</p>
+        <h2 class="fw-bold display-5">{{ count($locations) }}</h2>
+        <p>Dhaka Areas Covered</p>
       </div>
       <div class="col-6 col-md-3">
         <h2 class="fw-bold display-5">4.8★</h2>

@@ -11,7 +11,7 @@
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
-            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Specialization</th><th>District</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Specialization</th><th>Gender</th><th>Location</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
             @forelse($nurses as $nurse)
@@ -20,7 +20,8 @@
               <td>{{ $nurse->email }}</td>
               <td>{{ $nurse->phone }}</td>
               <td>{{ $nurse->nurseProfile->specialization ?? 'N/A' }}</td>
-              <td>{{ $nurse->nurseProfile->district ?? 'N/A' }}</td>
+              <td>{{ ucfirst($nurse->nurseProfile->gender ?? 'N/A') }}</td>
+              <td>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</td>
               <td>
                 @if($nurse->nurseProfile && $nurse->nurseProfile->is_approved)
                   <span class="badge bg-success">Approved</span>
@@ -41,7 +42,7 @@
               </td>
             </tr>
             @empty
-            <tr><td colspan="7" class="text-center py-4 text-muted">No nurses found.</td></tr>
+            <tr><td colspan="8" class="text-center py-4 text-muted">No nurses found.</td></tr>
             @endforelse
           </tbody>
         </table>

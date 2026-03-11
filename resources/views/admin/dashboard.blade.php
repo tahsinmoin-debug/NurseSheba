@@ -54,14 +54,14 @@
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
-            <tr><th>Name</th><th>Specialization</th><th>District</th><th>Action</th></tr>
+            <tr><th>Name</th><th>Specialization</th><th>Location</th><th>Action</th></tr>
           </thead>
           <tbody>
             @foreach($pendingNurses as $nurse)
             <tr>
               <td>{{ $nurse->name }}</td>
               <td>{{ $nurse->nurseProfile->specialization ?? 'N/A' }}</td>
-              <td>{{ $nurse->nurseProfile->district ?? 'N/A' }}</td>
+              <td>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</td>
               <td>
                 <form action="{{ route('admin.nurses.approve', $nurse->id) }}" method="POST" class="d-inline">
                   @csrf

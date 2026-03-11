@@ -11,7 +11,7 @@
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
-            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Registered</th></tr>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th>Address</th><th>Registered</th></tr>
           </thead>
           <tbody>
             @forelse($patients as $patient)
@@ -19,11 +19,12 @@
               <td>{{ $patient->name }}</td>
               <td>{{ $patient->email }}</td>
               <td>{{ $patient->phone }}</td>
+              <td>{{ $patient->location ?? 'N/A' }}</td>
               <td>{{ $patient->address }}</td>
               <td>{{ $patient->created_at->format('d M Y') }}</td>
             </tr>
             @empty
-            <tr><td colspan="5" class="text-center py-4 text-muted">No patients found.</td></tr>
+            <tr><td colspan="6" class="text-center py-4 text-muted">No patients found.</td></tr>
             @endforelse
           </tbody>
         </table>

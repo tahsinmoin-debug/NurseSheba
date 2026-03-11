@@ -14,7 +14,8 @@
             <span class="badge bg-success mb-2">Verified Nurse</span>
           @endif
           <p class="text-muted"><i class="fas fa-stethoscope me-1"></i>{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
-          <p class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->nurseProfile->district ?? 'N/A' }}, {{ $nurse->nurseProfile->thana ?? '' }}</p>
+          <p class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}, Dhaka</p>
+          <p class="text-muted"><i class="fas fa-venus-mars me-1"></i>{{ ucfirst($nurse->nurseProfile->gender ?? 'N/A') }}</p>
           <p class="text-muted"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} years experience</p>
           @if($nurse->nurseProfile && $nurse->nurseProfile->availability)
             <span class="badge bg-success">Available</span>

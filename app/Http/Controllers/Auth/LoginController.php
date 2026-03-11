@@ -18,6 +18,11 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
+    public function showAdminLoginForm()
+    {
+        return view('auth.admin-login');
+    }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -31,6 +36,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            $this->updateLoginTracking($request);
 
             if ($user->role === 'admin') {
                 return redirect('/admin/dashboard');
@@ -46,11 +52,45 @@ class LoginController extends Controller
         ])->onlyInput('email');
     }
 
+    public function adminLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->password,
+            'role' => 'admin',
+        ];
+
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'email' => 'Invalid admin credentials.',
+            ])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+        $this->updateLoginTracking($request);
+
+        return redirect()->route('admin.dashboard');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
+    }
+
+    private function updateLoginTracking(Request $request): void
+    {
+        $user = Auth::user();
+        $user->last_login_at = now();
+        $user->last_login_ip = $request->ip();
+        $user->login_count = ((int) $user->login_count) + 1;
+        $user->save();
     }
 }
