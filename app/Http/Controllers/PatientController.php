@@ -14,7 +14,7 @@ class PatientController extends Controller
         }
 
         $bookings = auth()->user()->bookingsAsPatient()
-            ->with(['nurse', 'nurse.nurseProfile', 'review'])
+            ->with(['nurse', 'nurse.nurseProfile', 'review', 'payment'])
             ->orderByDesc('date')
             ->orderByDesc('time')
             ->get();

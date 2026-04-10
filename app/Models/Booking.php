@@ -11,7 +11,7 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'patient_id', 'nurse_id', 'date', 'time', 'service_type', 'service_address', 'status',
+        'patient_id', 'nurse_id', 'date', 'time', 'service_type', 'service_address', 'duration_hours', 'status',
     ];
 
     protected $casts = [
@@ -36,5 +36,10 @@ class Booking extends Model
     public function review()
     {
         return $this->hasOne(Review::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
     }
 }

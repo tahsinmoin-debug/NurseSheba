@@ -21,8 +21,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'last_login_at' => 'datetime',
+        'password'          => 'hashed',
+        'last_login_at'     => 'datetime',
     ];
 
     public function nurseProfile()
@@ -38,5 +38,10 @@ class User extends Authenticatable
     public function bookingsAsNurse()
     {
         return $this->hasMany(Booking::class, 'nurse_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasManyThrough(Payment::class, Booking::class, 'patient_id', 'booking_id');
     }
 }

@@ -16,7 +16,7 @@ class NurseController extends Controller
         }
 
         $bookings = auth()->user()->bookingsAsNurse()
-            ->with(['patient'])
+            ->with(['patient', 'payment'])
             ->orderByDesc('date')
             ->orderByDesc('time')
             ->get();
@@ -57,7 +57,7 @@ class NurseController extends Controller
     {
         $profile = auth()->user()->nurseProfile;
         return view('nurse.profile', [
-            'profile' => $profile,
+            'profile'   => $profile,
             'locations' => config('dhaka_areas', []),
         ]);
     }
@@ -65,13 +65,13 @@ class NurseController extends Controller
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'qualification' => 'required|string|max:255',
-            'gender' => 'required|in:male,female',
-            'specialization' => 'required|string|max:255',
+            'qualification'    => 'required|string|max:255',
+            'gender'           => 'required|in:male,female',
+            'specialization'   => 'required|string|max:255',
             'experience_years' => 'required|integer|min:0',
-            'location' => ['required', 'string', Rule::in(config('dhaka_areas', []))],
-            'bio' => 'nullable|string',
-            'availability' => 'nullable|boolean',
+            'location'         => ['required', 'string', Rule::in(config('dhaka_areas', []))],
+            'bio'              => 'nullable|string',
+            'availability'     => 'nullable|boolean',
             'license_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
@@ -81,24 +81,24 @@ class NurseController extends Controller
         }
 
         if ($request->hasFile('license_document')) {
-            $licenseDocumentPath = $request->file('license_document')->store('license_documents', 'public');
+            $licenseDocumentPath      = $request->file('license_document')->store('license_documents', 'public');
             $profile->license_document = $licenseDocumentPath;
-            $profile->documents = $licenseDocumentPath;
+            $profile->documents        = $licenseDocumentPath;
         }
 
         $profile->fill([
-            'qualification' => $request->qualification,
-            'gender' => $request->gender,
-            'specialization' => $request->specialization,
+            'qualification'    => $request->qualification,
+            'gender'           => $request->gender,
+            'specialization'   => $request->specialization,
             'experience_years' => $request->experience_years,
-            'district' => 'Dhaka',
-            'thana' => $request->location,
-            'bio' => $request->bio,
-            'availability' => $request->has('availability'),
+            'district'         => 'Dhaka',
+            'thana'            => $request->location,
+            'bio'              => $request->bio,
+            'availability'     => $request->has('availability'),
         ]);
         $profile->save();
 
-        $user = auth()->user();
+        $user           = auth()->user();
         $user->location = $request->location;
         $user->save();
 

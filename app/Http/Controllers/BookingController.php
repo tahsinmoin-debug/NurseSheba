@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,17 +20,20 @@ class BookingController extends Controller
             ->with('nurseProfile')
             ->findOrFail($nurseId);
 
-        return view('patient.book', compact('nurse'));
+        $rates = config('service_rates.base_rates', []);
+
+        return view('patient.book', compact('nurse', 'rates'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nurse_id' => 'required|exists:users,id',
-            'date' => 'required|date|after_or_equal:today',
-            'time' => 'required',
-            'service_type' => 'required|string|max:255',
+            'nurse_id'        => 'required|exists:users,id',
+            'date'            => 'required|date|after_or_equal:today',
+            'time'            => 'required',
+            'service_type'    => 'required|string|max:255',
             'service_address' => 'required|string|max:500',
+            'duration_hours'  => 'required|numeric|min:1|max:24',
         ]);
 
         $nurse = User::whereKey($request->nurse_id)
@@ -47,13 +51,14 @@ class BookingController extends Controller
         }
 
         Booking::create([
-            'patient_id' => auth()->id(),
-            'nurse_id' => $request->nurse_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'service_type' => $request->service_type,
+            'patient_id'      => auth()->id(),
+            'nurse_id'        => $request->nurse_id,
+            'date'            => $request->date,
+            'time'            => $request->time,
+            'service_type'    => $request->service_type,
             'service_address' => $request->service_address,
-            'status' => 'pending',
+            'duration_hours'  => $request->duration_hours,
+            'status'          => 'pending',
         ]);
 
         return redirect()->route('patient.dashboard')->with('success', 'Booking request sent successfully!');
@@ -84,7 +89,25 @@ class BookingController extends Controller
         }
 
         $booking->update(['status' => 'accepted']);
-        return redirect()->back()->with('success', 'Booking accepted.');
+
+        // Auto-create pending payment record when nurse accepts
+        if (!$booking->payment) {
+            $nurse      = $booking->nurse()->with('nurseProfile')->first();
+            $experience = $nurse?->nurseProfile?->experience_years ?? 0;
+            $duration   = (float) ($booking->duration_hours ?? 1);
+            $cost       = Payment::calculateCost($booking->service_type, $experience, $duration);
+
+            Payment::create([
+                'booking_id'        => $booking->id,
+                'invoice_number'    => Payment::generateInvoiceNumber(),
+                'duration_hours'    => $duration,
+                'nurse_hourly_rate' => $cost['hourly_rate'],
+                'amount'            => $cost['total_amount'],
+                'payment_status'    => 'unpaid',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Booking accepted. Patient will be notified to pay.');
     }
 
     public function reject(Booking $booking)
@@ -109,6 +132,11 @@ class BookingController extends Controller
 
         if ($booking->status !== 'accepted') {
             return redirect()->back()->with('error', 'Only accepted bookings can be completed.');
+        }
+
+        // Ensure payment is made before marking complete
+        if ($booking->payment && $booking->payment->payment_status !== 'paid') {
+            return redirect()->back()->with('error', 'Cannot complete booking until patient has paid.');
         }
 
         $booking->update(['status' => 'completed']);

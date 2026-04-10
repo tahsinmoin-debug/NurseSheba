@@ -9,6 +9,7 @@ use App\Http\Controllers\NurseController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\PaymentController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -46,6 +47,14 @@ Route::middleware(['auth', 'patient'])->prefix('patient')->name('patient.')->gro
     Route::post('/book', [BookingController::class, 'store'])->name('book.store');
     Route::post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
     Route::post('/review', [ReviewController::class, 'store'])->name('review.store');
+
+    // Payment routes
+    Route::get('/payment/{booking}', [PaymentController::class, 'show'])->name('payment.show');
+    Route::post('/payment/{booking}/stripe-intent', [PaymentController::class, 'createStripeIntent'])->name('payment.stripe.intent');
+    Route::get('/payment/{booking}/success', [PaymentController::class, 'stripeSuccess'])->name('payment.stripe.success');
+    Route::post('/payment/{booking}/mobile', [PaymentController::class, 'simulateMobile'])->name('payment.mobile');
+    Route::get('/payment-history', [PaymentController::class, 'patientHistory'])->name('payment.history');
+    Route::get('/invoice/{payment}', [PaymentController::class, 'invoice'])->name('invoice');
 });
 
 // Nurse routes
@@ -56,6 +65,7 @@ Route::middleware(['auth', 'nurse'])->prefix('nurse')->name('nurse.')->group(fun
     Route::post('/booking/{booking}/accept', [BookingController::class, 'accept'])->name('booking.accept');
     Route::post('/booking/{booking}/reject', [BookingController::class, 'reject'])->name('booking.reject');
     Route::post('/booking/{booking}/complete', [BookingController::class, 'complete'])->name('booking.complete');
+    Route::get('/earnings', [PaymentController::class, 'nurseEarnings'])->name('earnings');
 });
 
 // Admin routes
@@ -71,4 +81,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
     Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
     Route::get('/support', [AdminController::class, 'supportRequests'])->name('support');
+    Route::post('/payment/{payment}/refund', [PaymentController::class, 'refund'])->name('payment.refund');
 });
