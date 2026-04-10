@@ -61,8 +61,56 @@ class AdminController extends Controller
 
     public function bookings()
     {
-        $bookings = Booking::with(['patient', 'nurse'])->latest()->paginate(15);
-        return view('admin.bookings', compact('bookings'));
+        $statusFilter = request('status', 'all');
+        if (!in_array($statusFilter, ['all', 'pending', 'accepted', 'completed', 'cancelled'], true)) {
+            $statusFilter = 'all';
+        }
+
+        $timelineFilter = request('timeline', 'all');
+        if (!in_array($timelineFilter, ['all', 'upcoming', 'past'], true)) {
+            $timelineFilter = 'all';
+        }
+
+        $query = Booking::with(['patient', 'nurse'])
+            ->orderByDesc('date')
+            ->orderByDesc('time');
+
+        if ($statusFilter !== 'all') {
+            $query->where('status', $statusFilter);
+        }
+
+        $today = now()->toDateString();
+        $currentTime = now()->format('H:i:s');
+
+        if ($timelineFilter === 'upcoming') {
+            $query->whereIn('status', ['pending', 'accepted'])
+                ->where(function ($builder) use ($today, $currentTime) {
+                    $builder->where('date', '>', $today)
+                        ->orWhere(function ($nested) use ($today, $currentTime) {
+                            $nested->where('date', $today)
+                                ->where('time', '>=', $currentTime);
+                        });
+                });
+        }
+
+        if ($timelineFilter === 'past') {
+            $query->where(function ($builder) use ($today, $currentTime) {
+                $builder->whereIn('status', ['completed', 'cancelled'])
+                    ->orWhere('date', '<', $today)
+                    ->orWhere(function ($nested) use ($today, $currentTime) {
+                        $nested->where('date', $today)
+                            ->where('time', '<', $currentTime);
+                    });
+            });
+        }
+
+        $bookings = $query->paginate(15)->withQueryString();
+
+        $statusCounts = Booking::selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        return view('admin.bookings', compact('bookings', 'statusFilter', 'timelineFilter', 'statusCounts'));
     }
 
     public function complaints()

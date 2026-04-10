@@ -17,6 +17,7 @@ class ExampleTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Quality Home Nursing Services');
+        $response->assertSee('Register as Patient');
     }
 
     public function test_guest_can_view_nurse_homepage(): void
@@ -25,6 +26,7 @@ class ExampleTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Grow Your Nursing Career With NurseSheba');
+        $response->assertSee('Register as Nurse');
     }
 
     public function test_nurse_sees_nurse_homepage_on_root(): void
@@ -47,7 +49,10 @@ class ExampleTest extends TestCase
         $response = $this->actingAs($nurse)->get('/');
 
         $response->assertOk();
+        $response->assertSee('Nurse Home');
+        $response->assertSee('Welcome back, ' . $nurse->name);
         $response->assertSee('Your Quick Actions');
+        $response->assertDontSee('Register as Nurse');
     }
 
     public function test_patient_sees_patient_homepage_on_root(): void
@@ -60,10 +65,13 @@ class ExampleTest extends TestCase
         $response = $this->actingAs($patient)->get('/');
 
         $response->assertOk();
-        $response->assertSee('Quality Home Nursing Services');
+        $response->assertSee('Patient Home');
+        $response->assertSee('Welcome back, ' . $patient->name);
+        $response->assertSee('Quick Search');
+        $response->assertDontSee('Register as Patient');
     }
 
-    public function test_admin_is_redirected_to_admin_dashboard_from_root(): void
+    public function test_admin_sees_admin_homepage_on_root(): void
     {
         $admin = User::factory()->create([
             'role' => 'admin',
@@ -71,7 +79,23 @@ class ExampleTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/');
 
-        $response->assertRedirect('/admin/dashboard');
+        $response->assertOk();
+        $response->assertSee('Admin Home');
+        $response->assertSee('Platform overview for ' . $admin->name);
+        $response->assertDontSee('Find Nurses');
+    }
+
+    public function test_logged_in_nurse_does_not_see_register_cta_on_for_nurses_page(): void
+    {
+        $nurse = User::factory()->create([
+            'role' => 'nurse',
+        ]);
+
+        $response = $this->actingAs($nurse)->get('/for-nurses');
+
+        $response->assertOk();
+        $response->assertSee('Nurse Home');
+        $response->assertDontSee('Register as Nurse');
     }
 
     public function test_register_page_supports_nurse_role_preselection(): void

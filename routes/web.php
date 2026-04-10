@@ -54,6 +54,7 @@ Route::middleware(['auth', 'nurse'])->prefix('nurse')->name('nurse.')->group(fun
     Route::get('/profile', [NurseController::class, 'profile'])->name('profile');
     Route::post('/profile', [NurseController::class, 'updateProfile'])->name('profile.update');
     Route::post('/booking/{booking}/accept', [BookingController::class, 'accept'])->name('booking.accept');
+    Route::post('/booking/{booking}/reject', [BookingController::class, 'reject'])->name('booking.reject');
     Route::post('/booking/{booking}/complete', [BookingController::class, 'complete'])->name('booking.complete');
 });
 
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/nurses/{id}/reject', [AdminController::class, 'rejectNurse'])->name('nurses.reject');
     Route::get('/patients', [AdminController::class, 'patients'])->name('patients');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
+    Route::post('/bookings/{booking}/status', [BookingController::class, 'adminUpdateStatus'])->name('bookings.status');
     Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints');
     Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
     Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
