@@ -18,6 +18,9 @@
       <p class="text-muted mb-0">Track upcoming visits, review past appointments, and manage booking requests.</p>
     </div>
     <div class="d-flex gap-2">
+      <a href="{{ route('patient.complaints') }}" class="btn btn-outline-danger">
+        <i class="fas fa-flag me-2"></i>My Complaints
+      </a>
       <a href="{{ route('patient.payment.history') }}" class="btn btn-outline-primary">
         <i class="fas fa-history me-2"></i>Payment History
       </a>
@@ -215,7 +218,16 @@
                         @include('patient._review_modal', ['booking' => $booking])
                       @elseif($booking->review)
                         <span class="badge bg-success"><i class="fas fa-check me-1"></i>Reviewed</span>
-                      @elseif(!$booking->payment && !in_array($booking->status, ['completed','cancelled']))
+                      @endif
+                      {{-- Report / Complaint --}}
+                      @if($booking->status === 'completed')
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#complaintModal{{ $booking->id }}">
+                          <i class="fas fa-flag me-1"></i>Report
+                        </button>
+                        @include('patient._complaint_modal', ['booking' => $booking])
+                      @endif
+                      {{-- No action fallback --}}
+                      @if(!$booking->payment && !in_array($booking->status, ['completed','cancelled']))
                         <span class="text-muted small">No action</span>
                       @endif
                     </div>

@@ -39,9 +39,27 @@
           <h6 class="fw-bold mb-1">{{ $nurse->name }}</h6>
           <p class="small text-muted mb-1">{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
           <p class="small text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</p>
-          <p class="small text-muted mb-2"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} yrs</p>
-          @if($nurse->nurseProfile && $nurse->nurseProfile->is_approved)
-            <span class="badge bg-success mb-2">Approved</span>
+          <p class="small text-muted mb-1"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} yrs</p>
+
+          {{-- Rating Display --}}
+          <div class="mb-2">
+            @if($nurse->review_count > 0)
+              <div class="d-flex align-items-center justify-content-center gap-1">
+                @for($i = 1; $i <= 5; $i++)
+                  <i class="fas fa-star fa-sm {{ $i <= round($nurse->average_rating) ? 'text-warning' : 'text-muted' }}"></i>
+                @endfor
+                <span class="small fw-semibold ms-1" style="color:#f59e0b;">{{ number_format($nurse->average_rating, 1) }}</span>
+                <span class="small text-muted">({{ $nurse->review_count }})</span>
+              </div>
+            @else
+              <small class="text-muted"><i class="fas fa-star text-muted"></i> No reviews</small>
+            @endif
+          </div>
+
+          @if($nurse->nurseProfile && $nurse->nurseProfile->availability)
+            <span class="badge bg-success mb-2"><i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i>Available</span>
+          @else
+            <span class="badge bg-secondary mb-2"><i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i>Not Available</span>
           @endif
           <div class="d-grid gap-1">
             <a href="{{ route('nurses.show', $nurse->id) }}" class="btn btn-sm btn-outline-primary">View Profile</a>

@@ -21,6 +21,9 @@
           <a href="{{ route('patient.dashboard') }}" class="btn btn-outline-primary btn-lg">
             <i class="fas fa-calendar-check me-2"></i>My Bookings
           </a>
+          <a href="{{ route('patient.complaints') }}" class="btn btn-outline-danger btn-lg">
+            <i class="fas fa-flag me-2"></i>My Complaints
+          </a>
         </div>
       </div>
       <div class="col-lg-5">
@@ -143,7 +146,10 @@
 <div style="background: #f8f9fa;" class="py-5">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h2 class="fw-bold mb-0" style="color: #0288d1;">Suggested Nurses</h2>
+      <div>
+        <h2 class="fw-bold mb-1" style="color: #0288d1;">Top-Rated Nurses</h2>
+        <p class="text-muted mb-0">Recommended based on highest patient ratings</p>
+      </div>
       <a href="{{ route('nurses.index') }}" class="btn btn-outline-primary">View All Nurses</a>
     </div>
     <div class="row g-4">
@@ -157,6 +163,22 @@
               </div>
             </div>
             <h5 class="fw-bold">{{ $nurse->name }}</h5>
+
+            {{-- Rating Display --}}
+            <div class="mb-2">
+              @if($nurse->review_count > 0)
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                  @for($i = 1; $i <= 5; $i++)
+                    <i class="fas fa-star {{ $i <= round($nurse->average_rating) ? 'text-warning' : 'text-muted' }}"></i>
+                  @endfor
+                  <span class="fw-semibold ms-1" style="color:#f59e0b;">{{ number_format($nurse->average_rating, 1) }}</span>
+                  <span class="small text-muted">({{ $nurse->review_count }})</span>
+                </div>
+              @else
+                <small class="text-muted"><i class="fas fa-star text-muted"></i> New nurse</small>
+              @endif
+            </div>
+
             <p class="text-muted mb-1"><i class="fas fa-stethoscope me-1"></i>{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
             <p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</p>
             <p class="text-muted mb-3"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} years exp.</p>

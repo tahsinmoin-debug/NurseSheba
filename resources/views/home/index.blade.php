@@ -42,7 +42,8 @@
 <!-- Featured Nurses -->
 @if($featuredNurses->count() > 0)
 <div class="container my-5">
-  <h2 class="text-center mb-4 fw-bold" style="color: #0288d1;">Featured Nurses</h2>
+  <h2 class="text-center mb-2 fw-bold" style="color: #0288d1;">Featured Nurses</h2>
+  <p class="text-center text-muted mb-4">Our top-rated nurses based on patient reviews</p>
   <div class="row g-4">
     @foreach($featuredNurses as $nurse)
     <div class="col-md-4">
@@ -54,6 +55,22 @@
             </div>
           </div>
           <h5 class="fw-bold">{{ $nurse->name }}</h5>
+
+          {{-- Rating Display --}}
+          <div class="mb-2">
+            @if($nurse->review_count > 0)
+              <div class="d-flex align-items-center justify-content-center gap-1">
+                @for($i = 1; $i <= 5; $i++)
+                  <i class="fas fa-star {{ $i <= round($nurse->average_rating) ? 'text-warning' : 'text-muted' }}"></i>
+                @endfor
+                <span class="fw-semibold ms-1" style="color:#f59e0b;">{{ number_format($nurse->average_rating, 1) }}</span>
+                <span class="small text-muted">({{ $nurse->review_count }})</span>
+              </div>
+            @else
+              <small class="text-muted"><i class="fas fa-star text-muted"></i> New nurse</small>
+            @endif
+          </div>
+
           <p class="text-muted mb-1"><i class="fas fa-stethoscope me-1"></i>{{ $nurse->nurseProfile->specialization ?? 'General Nursing' }}</p>
           <p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-1"></i>{{ $nurse->location ?? $nurse->nurseProfile->thana ?? 'N/A' }}</p>
           <p class="text-muted mb-3"><i class="fas fa-briefcase me-1"></i>{{ $nurse->nurseProfile->experience_years ?? 0 }} years exp.</p>

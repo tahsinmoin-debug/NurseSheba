@@ -31,13 +31,16 @@
           @if(auth()->user()->role === 'patient')
             <li class="nav-item"><a class="nav-link" href="{{ route('nurses.index') }}">Find Nurses</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('patient.dashboard') }}">My Bookings</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('patient.complaints') }}">My Complaints</a></li>
           @elseif(auth()->user()->role === 'nurse')
             <li class="nav-item"><a class="nav-link" href="{{ route('nurse.dashboard') }}">Appointments</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('nurse.profile') }}">My Profile</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('nurse.complaints') }}">Complaints</a></li>
           @elseif(auth()->user()->role === 'admin')
             <li class="nav-item"><a class="nav-link" href="{{ route('admin.nurses') }}">Nurses</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('admin.patients') }}">Patients</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('admin.bookings') }}">Bookings</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('admin.complaints') }}">Complaints</a></li>
           @endif
         @else
           <li class="nav-item"><a class="nav-link" href="{{ route('home.nurse') }}">For Nurses</a></li>

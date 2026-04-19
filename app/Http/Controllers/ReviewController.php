@@ -18,15 +18,27 @@ class ReviewController extends Controller
 
         $booking = Booking::findOrFail($request->booking_id);
 
+        // Only the patient who made the booking can review
         if ($booking->patient_id !== auth()->id()) {
             return redirect()->back()->with('error', 'Unauthorized.');
         }
 
-        Review::updateOrCreate(
-            ['booking_id' => $request->booking_id],
-            ['rating' => $request->rating, 'comment' => $request->comment]
-        );
+        // Reviews are only allowed after booking is completed
+        if ($booking->status !== 'completed') {
+            return redirect()->back()->with('error', 'You can only review a completed booking.');
+        }
 
-        return redirect()->back()->with('success', 'Review submitted!');
+        // Prevent duplicate reviews
+        if ($booking->review) {
+            return redirect()->back()->with('error', 'You have already reviewed this booking.');
+        }
+
+        Review::create([
+            'booking_id' => $request->booking_id,
+            'rating'     => $request->rating,
+            'comment'    => $request->comment,
+        ]);
+
+        return redirect()->back()->with('success', 'Review submitted successfully! Thank you for your feedback.');
     }
 }

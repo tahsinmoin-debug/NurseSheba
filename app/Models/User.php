@@ -44,4 +44,53 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Payment::class, Booking::class, 'patient_id', 'booking_id');
     }
+
+    /**
+     * Get all reviews received by this nurse (through their bookings).
+     */
+    public function reviewsAsNurse()
+    {
+        return $this->hasManyThrough(Review::class, Booking::class, 'nurse_id', 'booking_id');
+    }
+
+    /**
+     * Complaints filed against this user (as nurse).
+     */
+    public function complaintsAgainst()
+    {
+        return $this->hasMany(Complaint::class, 'nurse_id');
+    }
+
+    /**
+     * Complaints filed by this user.
+     */
+    public function complaintsFiled()
+    {
+        return $this->hasMany(Complaint::class, 'user_id');
+    }
+
+    /**
+     * Get the nurse's average rating (computed from reviews on completed bookings).
+     */
+    public function getAverageRatingAttribute(): ?float
+    {
+        if ($this->role !== 'nurse') {
+            return null;
+        }
+
+        $avg = $this->reviewsAsNurse()->avg('rating');
+        return $avg ? round($avg, 1) : null;
+    }
+
+    /**
+     * Get total number of reviews for this nurse.
+     */
+    public function getReviewCountAttribute(): int
+    {
+        if ($this->role !== 'nurse') {
+            return 0;
+        }
+
+        return $this->reviewsAsNurse()->count();
+    }
 }

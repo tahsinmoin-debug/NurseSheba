@@ -10,6 +10,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ComplaintController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -55,6 +56,11 @@ Route::middleware(['auth', 'patient'])->prefix('patient')->name('patient.')->gro
     Route::post('/payment/{booking}/mobile', [PaymentController::class, 'simulateMobile'])->name('payment.mobile');
     Route::get('/payment-history', [PaymentController::class, 'patientHistory'])->name('payment.history');
     Route::get('/invoice/{payment}', [PaymentController::class, 'invoice'])->name('invoice');
+
+    // Complaint routes
+    Route::get('/complaint/{booking}/create', [ComplaintController::class, 'create'])->name('complaint.create');
+    Route::post('/complaint', [ComplaintController::class, 'store'])->name('complaint.store');
+    Route::get('/complaints', [ComplaintController::class, 'myComplaints'])->name('complaints');
 });
 
 // Nurse routes
@@ -66,6 +72,12 @@ Route::middleware(['auth', 'nurse'])->prefix('nurse')->name('nurse.')->group(fun
     Route::post('/booking/{booking}/reject', [BookingController::class, 'reject'])->name('booking.reject');
     Route::post('/booking/{booking}/complete', [BookingController::class, 'complete'])->name('booking.complete');
     Route::get('/earnings', [PaymentController::class, 'nurseEarnings'])->name('earnings');
+    Route::post('/toggle-availability', [NurseController::class, 'toggleAvailability'])->name('toggle.availability');
+
+    // Complaint routes
+    Route::get('/complaint/{booking}/create', [ComplaintController::class, 'create'])->name('complaint.create');
+    Route::post('/complaint', [ComplaintController::class, 'store'])->name('complaint.store');
+    Route::get('/complaints', [ComplaintController::class, 'myComplaints'])->name('complaints');
 });
 
 // Admin routes
@@ -78,6 +90,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::post('/bookings/{booking}/status', [BookingController::class, 'adminUpdateStatus'])->name('bookings.status');
     Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints');
+    Route::post('/complaint/{complaint}/reply', [ComplaintController::class, 'reply'])->name('complaint.reply');
+    Route::post('/complaint/{complaint}/status', [ComplaintController::class, 'updateStatus'])->name('complaint.status');
     Route::get('/announcements', [AdminController::class, 'announcements'])->name('announcements');
     Route::post('/announcements', [AdminController::class, 'storeAnnouncement'])->name('announcements.store');
     Route::get('/support', [AdminController::class, 'supportRequests'])->name('support');

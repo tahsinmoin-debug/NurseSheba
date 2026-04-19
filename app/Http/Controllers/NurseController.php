@@ -15,7 +15,9 @@ class NurseController extends Controller
             $statusFilter = 'all';
         }
 
-        $bookings = auth()->user()->bookingsAsNurse()
+        $user = auth()->user();
+
+        $bookings = $user->bookingsAsNurse()
             ->with(['patient', 'payment'])
             ->orderByDesc('date')
             ->orderByDesc('time')
@@ -40,16 +42,31 @@ class NurseController extends Controller
             })
             ->values();
 
-        $statusCounts = auth()->user()->bookingsAsNurse()
+        $statusCounts = $user->bookingsAsNurse()
             ->selectRaw('status, count(*) as aggregate')
             ->groupBy('status')
             ->pluck('aggregate', 'status');
+
+        // Rating summary for the nurse
+        $ratingSummary = [
+            'average' => $user->average_rating,
+            'count'   => $user->review_count,
+        ];
+
+        // Recent reviews
+        $recentReviews = $user->reviewsAsNurse()
+            ->with('booking.patient')
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('nurse.dashboard', compact(
             'upcomingBookings',
             'pastBookings',
             'statusFilter',
-            'statusCounts'
+            'statusCounts',
+            'ratingSummary',
+            'recentReviews'
         ));
     }
 
@@ -103,5 +120,22 @@ class NurseController extends Controller
         $user->save();
 
         return redirect()->route('nurse.profile')->with('success', 'Profile updated successfully!');
+    }
+
+    /**
+     * Toggle the nurse's availability status from the dashboard.
+     */
+    public function toggleAvailability()
+    {
+        $profile = auth()->user()->nurseProfile;
+
+        if (!$profile) {
+            return redirect()->back()->with('error', 'Please complete your profile first.');
+        }
+
+        $profile->update(['availability' => !$profile->availability]);
+
+        $status = $profile->availability ? 'Available' : 'Not Available';
+        return redirect()->back()->with('success', "Your status is now: {$status}");
     }
 }

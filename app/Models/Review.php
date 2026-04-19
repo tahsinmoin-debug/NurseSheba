@@ -15,4 +15,28 @@ class Review extends Model
     {
         return $this->belongsTo(Booking::class);
     }
+
+    public function nurse()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Booking::class,
+            'id',        // bookings.id
+            'id',        // users.id
+            'booking_id', // reviews.booking_id
+            'nurse_id'   // bookings.nurse_id
+        );
+    }
+
+    public function patient()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Booking::class,
+            'id',
+            'id',
+            'booking_id',
+            'patient_id'
+        );
+    }
 }

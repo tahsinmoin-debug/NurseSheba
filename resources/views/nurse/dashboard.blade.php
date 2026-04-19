@@ -17,7 +17,25 @@
       <h3 class="fw-bold mb-0">Welcome, {{ auth()->user()->name }}!</h3>
       <p class="text-muted mb-0">Review booking requests, manage confirmed visits, and track booking history.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
+      {{-- Availability Toggle --}}
+      @if(auth()->user()->nurseProfile)
+        <form action="{{ route('nurse.toggle.availability') }}" method="POST" class="d-inline">
+          @csrf
+          @if(auth()->user()->nurseProfile->availability)
+            <button type="submit" class="btn btn-success" onclick="return confirm('Switch to Not Available?')">
+              <i class="fas fa-toggle-on me-2"></i>Available
+            </button>
+          @else
+            <button type="submit" class="btn btn-secondary" onclick="return confirm('Switch to Available?')">
+              <i class="fas fa-toggle-off me-2"></i>Not Available
+            </button>
+          @endif
+        </form>
+      @endif
+      <a href="{{ route('nurse.complaints') }}" class="btn btn-outline-danger">
+        <i class="fas fa-flag me-2"></i>Complaints
+      </a>
       <a href="{{ route('nurse.earnings') }}" class="btn btn-outline-success">
         <i class="fas fa-chart-line me-2"></i>Earnings
       </a>
@@ -37,6 +55,56 @@
       @endif
     </div>
   @endif
+
+  {{-- Rating Summary Card --}}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4 text-center">
+          <h6 class="text-uppercase text-muted mb-2">My Rating</h6>
+          @if($ratingSummary['count'] > 0)
+            <div class="display-4 fw-bold" style="color:#f59e0b;">{{ $ratingSummary['average'] }}</div>
+            <div class="mb-2">
+              @for($i = 1; $i <= 5; $i++)
+                <i class="fas fa-star {{ $i <= round($ratingSummary['average']) ? 'text-warning' : 'text-muted' }}"></i>
+              @endfor
+            </div>
+            <p class="text-muted mb-0">Based on {{ $ratingSummary['count'] }} review{{ $ratingSummary['count'] !== 1 ? 's' : '' }}</p>
+          @else
+            <div class="display-4 fw-bold text-muted">—</div>
+            <p class="text-muted mb-0">No reviews yet</p>
+          @endif
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h6 class="text-uppercase text-muted mb-3">Recent Reviews</h6>
+          @if($recentReviews->count() > 0)
+            @foreach($recentReviews as $review)
+              <div class="{{ !$loop->last ? 'border-bottom pb-2 mb-2' : '' }}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    @for($i = 1; $i <= 5; $i++)
+                      <i class="fas fa-star fa-sm {{ $i <= $review->rating ? 'text-warning' : 'text-muted' }}"></i>
+                    @endfor
+                    <span class="ms-2 small fw-semibold">{{ $review->booking->patient->name ?? 'Patient' }}</span>
+                  </div>
+                  <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
+                </div>
+                @if($review->comment)
+                  <p class="text-muted small mb-0 mt-1">{{ Str::limit($review->comment, 120) }}</p>
+                @endif
+              </div>
+            @endforeach
+          @else
+            <p class="text-muted mb-0">No reviews received yet. Complete bookings to get reviews from patients.</p>
+          @endif
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-4">
@@ -201,14 +269,24 @@
                     @endif
                   </td>
                   <td>
-                    @if($booking->status === 'accepted' && $booking->payment && $booking->payment->payment_status === 'paid')
-                      <form action="{{ route('nurse.booking.complete', $booking) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-primary">Mark Completed</button>
-                      </form>
-                    @else
-                      <span class="text-muted small">No action</span>
-                    @endif
+                    <div class="d-flex gap-1 flex-wrap">
+                      @if($booking->status === 'accepted' && $booking->payment && $booking->payment->payment_status === 'paid')
+                        <form action="{{ route('nurse.booking.complete', $booking) }}" method="POST" class="d-inline">
+                          @csrf
+                          <button type="submit" class="btn btn-sm btn-primary">Mark Completed</button>
+                        </form>
+                      @endif
+                      {{-- Report Patient (for completed bookings) --}}
+                      @if($booking->status === 'completed')
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#complaintModal{{ $booking->id }}">
+                          <i class="fas fa-flag me-1"></i>Report
+                        </button>
+                        @include('patient._complaint_modal', ['booking' => $booking])
+                      @endif
+                      @if($booking->status !== 'completed' && !($booking->status === 'accepted' && $booking->payment && $booking->payment->payment_status === 'paid'))
+                        <span class="text-muted small">No action</span>
+                      @endif
+                    </div>
                   </td>
                 </tr>
               @endforeach

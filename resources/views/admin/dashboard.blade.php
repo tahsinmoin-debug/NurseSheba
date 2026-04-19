@@ -41,7 +41,8 @@
     <div class="col-auto"><a href="{{ route('admin.nurses') }}" class="btn btn-outline-primary"><i class="fas fa-user-nurse me-2"></i>Manage Nurses</a></div>
     <div class="col-auto"><a href="{{ route('admin.patients') }}" class="btn btn-outline-success"><i class="fas fa-users me-2"></i>Manage Patients</a></div>
     <div class="col-auto"><a href="{{ route('admin.bookings') }}" class="btn btn-outline-warning"><i class="fas fa-calendar me-2"></i>View Bookings</a></div>
-    <div class="col-auto"><a href="{{ route('admin.announcements') }}" class="btn btn-outline-info"><i class="fas fa-bullhorn me-2"></i>Announcements</a></div>
+    <div class="col-auto"><a href="{{ route('admin.complaints') }}" class="btn btn-outline-danger"><i class="fas fa-flag me-2"></i>Complaints</a></div>
+    <div class="col-auto"><a href="{{ route('admin.support') }}" class="btn btn-outline-secondary"><i class="fas fa-headset me-2"></i>Support</a></div>
   </div>
 
   <!-- Pending Approvals -->

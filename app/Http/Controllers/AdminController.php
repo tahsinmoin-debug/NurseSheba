@@ -113,10 +113,28 @@ class AdminController extends Controller
         return view('admin.bookings', compact('bookings', 'statusFilter', 'timelineFilter', 'statusCounts'));
     }
 
-    public function complaints()
+    public function complaints(Request $request)
     {
-        $complaints = Complaint::with(['user', 'nurse'])->latest()->get();
-        return view('admin.complaints', compact('complaints'));
+        $statusFilter = $request->query('status', 'all');
+        $typeFilter = $request->query('type', 'all');
+
+        $query = Complaint::with(['user', 'nurse', 'booking'])->latest();
+
+        if ($statusFilter !== 'all' && in_array($statusFilter, Complaint::STATUSES, true)) {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($typeFilter !== 'all' && in_array($typeFilter, Complaint::COMPLAINT_TYPES, true)) {
+            $query->where('complaint_type', $typeFilter);
+        }
+
+        $complaints = $query->get();
+
+        $statusCounts = Complaint::selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        return view('admin.complaints', compact('complaints', 'statusFilter', 'typeFilter', 'statusCounts'));
     }
 
     public function announcements()

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\Booking;
 use App\Models\Complaint;
+use App\Models\Review;
 use App\Models\SupportRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -22,6 +24,24 @@ class HomeController extends Controller
             'nurse' => $this->nurseHome(),
             default => $this->patientHome(),
         };
+    }
+
+    /**
+     * Get featured nurses ordered by highest average rating.
+     */
+    private function getFeaturedNurses(int $limit = 6)
+    {
+        return User::where('role', 'nurse')
+            ->whereHas('nurseProfile', function ($q) {
+                $q->where('is_approved', true);
+            })
+            ->with('nurseProfile')
+            ->withCount(['reviewsAsNurse as review_count'])
+            ->withAvg('reviewsAsNurse as average_rating', 'rating')
+            ->orderByDesc('average_rating')
+            ->orderByDesc('review_count')
+            ->take($limit)
+            ->get();
     }
 
     public function nurseHome()
@@ -76,14 +96,7 @@ class HomeController extends Controller
 
     private function patientHome()
     {
-        $featuredNurses = User::where('role', 'nurse')
-            ->whereHas('nurseProfile', function ($q) {
-                $q->where('is_approved', true);
-            })
-            ->with('nurseProfile')
-            ->latest()
-            ->take(6)
-            ->get();
+        $featuredNurses = $this->getFeaturedNurses(6);
 
         $user = auth()->user();
         $patientSummary = null;
@@ -128,14 +141,7 @@ class HomeController extends Controller
 
     private function guestHome()
     {
-        $featuredNurses = User::where('role', 'nurse')
-            ->whereHas('nurseProfile', function ($q) {
-                $q->where('is_approved', true);
-            })
-            ->with('nurseProfile')
-            ->latest()
-            ->take(6)
-            ->get();
+        $featuredNurses = $this->getFeaturedNurses(6);
 
         return view('home.index', [
             'featuredNurses' => $featuredNurses,
@@ -168,6 +174,7 @@ class HomeController extends Controller
         $operations = [
             'support_requests' => SupportRequest::count(),
             'complaints' => Complaint::count(),
+            'open_complaints' => Complaint::where('status', 'open')->count(),
             'announcements' => Announcement::count(),
         ];
 
@@ -190,7 +197,9 @@ class HomeController extends Controller
             ->whereHas('nurseProfile', function ($q) {
                 $q->where('is_approved', true);
             })
-            ->with('nurseProfile');
+            ->with('nurseProfile')
+            ->withCount(['reviewsAsNurse as review_count'])
+            ->withAvg('reviewsAsNurse as average_rating', 'rating');
 
         if ($request->location) {
             $query->where('location', $request->location);
@@ -201,6 +210,9 @@ class HomeController extends Controller
                 $q->where('specialization', 'like', '%' . $request->specialization . '%');
             });
         }
+
+        // Default sort by rating
+        $query->orderByDesc('average_rating')->orderByDesc('review_count');
 
         $nurses = $query->paginate(12);
 
@@ -215,15 +227,20 @@ class HomeController extends Controller
         $nurse = User::where('role', 'nurse')->with([
             'nurseProfile',
             'bookingsAsNurse.review',
+            'bookingsAsNurse.patient',
         ])->findOrFail($id);
 
         $reviews = collect();
         foreach ($nurse->bookingsAsNurse as $booking) {
             if ($booking->review) {
+                $booking->review->patient_name = $booking->patient->name ?? 'Anonymous';
                 $reviews->push($booking->review);
             }
         }
 
-        return view('nurses.show', compact('nurse', 'reviews'));
+        $averageRating = $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : null;
+        $reviewCount = $reviews->count();
+
+        return view('nurses.show', compact('nurse', 'reviews', 'averageRating', 'reviewCount'));
     }
 }
