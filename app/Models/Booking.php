@@ -29,6 +29,7 @@ class Booking extends Model
         return $this->belongsTo(User::class, 'patient_id');
     }
 
+    // Link each booking to its assigned nurse account.
     public function nurse()
     {
         return $this->belongsTo(User::class, 'nurse_id');
