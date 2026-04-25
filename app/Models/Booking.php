@@ -40,6 +40,7 @@ class Booking extends Model
         return $this->hasOne(Review::class);
     }
 
+    // Each booking can be associated with a single payment record.
     public function payment()
     {
         return $this->hasOne(Payment::class);
