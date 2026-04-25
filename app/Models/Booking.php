@@ -45,6 +45,7 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
+    // A booking can have multiple complaints recorded against it.
     public function complaints()
     {
         return $this->hasMany(Complaint::class);
