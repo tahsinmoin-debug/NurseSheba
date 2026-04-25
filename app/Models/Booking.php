@@ -18,6 +18,7 @@ class Booking extends Model
         'date' => 'date',
     ];
 
+    // Combine the stored date and time into one Carbon instance for convenience.
     public function getAppointmentAtAttribute(): Carbon
     {
         return Carbon::parse($this->date->toDateString() . ' ' . $this->time);
