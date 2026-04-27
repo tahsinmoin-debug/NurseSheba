@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+// NurseProfile model handles nurse-related profile information
 class NurseProfile extends Model
 {
     use HasFactory;
