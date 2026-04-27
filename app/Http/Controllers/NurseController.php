@@ -123,7 +123,7 @@ class NurseController extends Controller
     }
 
     /**
-     * Toggle the nurse's availability status from the dashboard.
+     * Toggle the nurse's availability status from the dashboard  .
      */
     public function toggleAvailability()
     {
